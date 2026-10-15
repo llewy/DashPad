@@ -1,0 +1,38 @@
+
+name: Build DashPad
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          xcodebuild -version
+          xcodebuild -list -project DashPad.xcodeproj
+
+      - name: Build for iPad
+        run: |
+          xcodebuild \
+            -project DashPad.xcodeproj \
+            -scheme DashPad \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload app build
+        uses: actions/upload-artifact@v4
+        with:
+          name: DashPad-unsigned-build
+          path: build/Build/Products/Release-iphoneos/DashPad.app
+          if-no-files-found: error
